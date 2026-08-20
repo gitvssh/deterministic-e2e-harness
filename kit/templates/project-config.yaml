@@ -1,0 +1,13 @@
+version: 1
+runner:
+  type: hurl
+  version: 8.0.1
+api:
+  base_url_variable: E2E_BASE_URL
+  openapi: openapi.yaml
+secrets:
+  # Environment variable names only. Never place values here.
+  variables: []
+execution:
+  specs: specs/*.hurl
+  reports: reports/

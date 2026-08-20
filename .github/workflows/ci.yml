@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    # The internal runner executes only trusted owner pushes and manual runs.
+    if: github.repository == 'gitvssh/deterministic-e2e-harness' && github.actor == 'gitvssh'
+    runs-on: homelab-deterministic-e2e-harness
+    timeout-minutes: 30
+    steps:
+      - name: Check out the requested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Install uv without Actions cache
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: false
+          version: "0.9.26"
+
+      - name: Pin Python
+        run: uv python install 3.14
+
+      - name: Run the complete public-release quality gate
+        run: python3 scripts/quality.py all

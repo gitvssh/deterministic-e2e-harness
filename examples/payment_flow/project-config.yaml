@@ -1,0 +1,12 @@
+version: 1
+runner:
+  type: hurl
+  version: 8.0.1
+api:
+  base_url_variable: E2E_BASE_URL
+  openapi: examples/payment_flow/openapi.yaml
+secrets:
+  variables: []
+execution:
+  specs: examples/payment_flow/specs/*.hurl
+  reports: reports/

@@ -1,0 +1,89 @@
+openapi: 3.1.0
+info:
+  title: Synthetic Payment API
+  version: 1.0.0
+  description: In-memory API used only to demonstrate deterministic E2E testing.
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /health:
+    get:
+      operationId: health
+      responses:
+        "200":
+          description: API is ready.
+  /users:
+    post:
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        "201":
+          description: Synthetic user registered.
+  /payments:
+    post:
+      operationId: submitPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+      responses:
+        "402":
+          description: Deterministic retryable decline.
+  /payments/retry:
+    post:
+      operationId: retryPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentRequest"
+      responses:
+        "200":
+          description: Payment captured.
+  /payments/{payment_id}:
+    get:
+      operationId: getPayment
+      parameters:
+        - name: payment_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Captured payment state.
+        "404":
+          description: Unknown payment.
+components:
+  schemas:
+    UserRegistration:
+      type: object
+      required: [external_id, email]
+      properties:
+        external_id:
+          type: string
+        email:
+          type: string
+          format: email
+    PaymentRequest:
+      type: object
+      required: [user_id, order_id, amount, payment_token]
+      properties:
+        user_id:
+          type: string
+        order_id:
+          type: string
+        amount:
+          type: integer
+          minimum: 1
+        payment_token:
+          type: string
+          enum: [synthetic-decline, synthetic-approve]
